@@ -1,0 +1,10 @@
+langchain-groq
+langchain_community
+langchain
+langchain_core
+pypdf
+langchain_chroma
+langchain_huggingface
+fastapi
+uvicorn 
+numpy==2.2.4
