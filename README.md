@@ -2,7 +2,7 @@
 
 ### 1. **Clone the Repository**
 ```bash
-git clone https://github.com/your-repo/kavach.git
+git clone [https://github.com/your-repo/kavach.git](https://github.com/palakbansal8810/Kavach.git)
 cd kavach
 ```
 
