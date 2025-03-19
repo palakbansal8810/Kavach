@@ -130,7 +130,7 @@ async def test_cors(request: Request):
     return JSONResponse(
         content={"message": "CORS is working!"},
         headers={
-            "Access-Control-Allow-Origin": "http://localhost:5174",
+            "Access-Control-Allow-Origin": "http://localhost:5173",
             "Access-Control-Allow-Credentials": "true"
         }
     )
@@ -153,7 +153,7 @@ async def ask_question(request: Request, question: dict):
         return JSONResponse(
             content={"answer": response['answer']},
             headers={
-                "Access-Control-Allow-Origin": "http://localhost:5174",
+                "Access-Control-Allow-Origin": "http://localhost:5173",
                 "Access-Control-Allow-Credentials": "true"
             }
         )
@@ -162,7 +162,7 @@ async def ask_question(request: Request, question: dict):
             status_code=500,
             content={"error": str(e)},
             headers={
-                "Access-Control-Allow-Origin": "http://localhost:5174",
+                "Access-Control-Allow-Origin": "http://localhost:5173",
                 "Access-Control-Allow-Credentials": "true"
             }
         )
