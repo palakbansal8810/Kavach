@@ -1,5 +1,6 @@
-from fastapi import FastAPI, Request, HTTPException, Depends
+from fastapi import FastAPI, Request, HTTPException, Response
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_chroma import Chroma
@@ -13,10 +14,23 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from dotenv import load_dotenv
 import uuid
 import os
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
 load_dotenv()
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://localhost:5174"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
 os.environ['HF_TOKEN'] = os.getenv('HF_TOKEN')
 os.environ['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY')
@@ -60,9 +74,11 @@ contextualize_q_prompt = ChatPromptTemplate([
 history_aware_retriever = create_history_aware_retriever(llm, retriever, contextualize_q_prompt)
 
 system_prompt = (
-    "You are a safety expert 'Kavach' assisting users with their safety-related concerns "
-    "and providing guidance on Sanraksha app features. Use the retrieved context from safety guidelines to provide CONCISE answers. "
-    "If you don't have relevant information, say 'I am not sure' rather than making up an answer."
+    "You are 'Kavach,' an AI safety assistant providing users with safety-related guidance and "
+    "information about Sanraksha app features. "
+    "Answer in a clear, concise, and structured format. "
+    "Try to avoid use of symbols like * or # or any other in the response to enhance readability."
+    "If you don't have relevant information, say 'I am not sure.'"
     "\n\n"
     "{context}"
 )
@@ -105,19 +121,48 @@ conversational_rag_chain = RunnableWithMessageHistory(
     output_messages_key='answer'
 )
 
-@app.post("/ask/")
-async def ask_question(request: Request, question: dict):
-    session_id = request.state.session_id
-    session_history = get_session_history(session_id)
+@app.get("/")
+async def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
-    user_input = question.get("input")
-    if not user_input:
-        raise HTTPException(status_code=400, detail="No input provided")
-
-    response = conversational_rag_chain.invoke(
-        {'input': user_input},
-        config={'configurable': {'session_id': session_id}}
+@app.post("/test/")
+async def test_cors(request: Request):
+    return JSONResponse(
+        content={"message": "CORS is working!"},
+        headers={
+            "Access-Control-Allow-Origin": "http://localhost:5174",
+            "Access-Control-Allow-Credentials": "true"
+        }
     )
 
-    return JSONResponse(content={"answer": response['answer']})
+@app.post("/ask/")
+async def ask_question(request: Request, question: dict):
+    try:
+        session_id = request.state.session_id
+        session_history = get_session_history(session_id)
 
+        user_input = question.get("input")
+        if not user_input:
+            raise HTTPException(status_code=400, detail="No input provided")
+
+        response = conversational_rag_chain.invoke(
+            {'input': user_input},
+            config={'configurable': {'session_id': session_id}}
+        )
+
+        return JSONResponse(
+            content={"answer": response['answer']},
+            headers={
+                "Access-Control-Allow-Origin": "http://localhost:5174",
+                "Access-Control-Allow-Credentials": "true"
+            }
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)},
+            headers={
+                "Access-Control-Allow-Origin": "http://localhost:5174",
+                "Access-Control-Allow-Credentials": "true"
+            }
+        )
