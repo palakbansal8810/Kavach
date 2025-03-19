@@ -7,3 +7,5 @@ langchain_chroma
 langchain_huggingface
 fastapi
 uvicorn 
+numpy==1.26.4
+
