@@ -156,5 +156,9 @@ async def ask_question(request: Request, question: dict):
     except Exception as e:
         return JSONResponse(
             status_code=500,
-            content={"error": str(e)}
+            content={"error": str(e)},
+            headers={
+                "Access-Control-Allow-Origin": "http://localhost:5174",
+                "Access-Control-Allow-Credentials": "true"
+            }
         )
