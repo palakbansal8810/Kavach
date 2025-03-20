@@ -53,7 +53,7 @@ def load_documents():
         loader = PyPDFLoader(pdf_path)
         docs = loader.load()
         documents.extend(docs)
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=5000, chunk_overlap=200)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     return text_splitter.split_documents(documents)
 
 splits = load_documents()
@@ -158,7 +158,7 @@ async def ask_question(request: Request, question: dict):
             status_code=500,
             content={"error": str(e)},
             headers={
-                "Access-Control-Allow-Origin": "http://localhost:5174",
+                "Access-Control-Allow-Origin": "http://localhost:5173",
                 "Access-Control-Allow-Credentials": "true"
             }
         )
