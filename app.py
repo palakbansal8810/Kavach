@@ -57,7 +57,7 @@ def load_documents():
     return text_splitter.split_documents(documents)
 
 splits = load_documents()
-vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings, persist_directory="./chroma_db")
+vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
 retriever = vectorstore.as_retriever()
 
 contextualize_q_system_prompt = (
@@ -151,18 +151,10 @@ async def ask_question(request: Request, question: dict):
         )
 
         return JSONResponse(
-            content={"answer": response['answer']},
-            headers={
-                "Access-Control-Allow-Origin": "http://localhost:5173",
-                "Access-Control-Allow-Credentials": "true"
-            }
+            content={"answer": response['answer']}
         )
     except Exception as e:
         return JSONResponse(
             status_code=500,
-            content={"error": str(e)},
-            headers={
-                "Access-Control-Allow-Origin": "http://localhost:5173",
-                "Access-Control-Allow-Credentials": "true"
-            }
+            content={"error": str(e)}
         )

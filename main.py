@@ -56,7 +56,7 @@ def load_documents():
     return text_splitter.split_documents(documents)
 
 splits = load_documents()
-vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings, persist_directory="./chroma_db")
+vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
 retriever = vectorstore.as_retriever()
 
 contextualize_q_system_prompt = (
