@@ -36,8 +36,8 @@ os.environ['HF_TOKEN'] = os.getenv('HF_TOKEN')
 os.environ['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY')
 api_key = os.getenv('GROQ_API_KEY')
 
-embeddings = HuggingFaceEmbeddings(model_name='all-MiniLM-L6-v2')
-llm = ChatGroq(groq_api_key=api_key, model_name='llama3-8b-8192')
+embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/paraphrase-MiniLM-L3-v2')
+llm = ChatGroq(groq_api_key=api_key, model_name='Gemma2-9b-It')
 
 session_store = {}
 
@@ -53,7 +53,7 @@ def load_documents():
         loader = PyPDFLoader(pdf_path)
         docs = loader.load()
         documents.extend(docs)
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=5000, chunk_overlap=200)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     return text_splitter.split_documents(documents)
 
 splits = load_documents()
@@ -158,7 +158,7 @@ async def ask_question(request: Request, question: dict):
             status_code=500,
             content={"error": str(e)},
             headers={
-                "Access-Control-Allow-Origin": "http://localhost:5174",
+                "Access-Control-Allow-Origin": "http://localhost:5173",
                 "Access-Control-Allow-Credentials": "true"
             }
         )
